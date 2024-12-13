@@ -26,47 +26,55 @@ local function http_post(address, body, callback)
         return callback(nil, "Address parsing error: " .. err)
     end
 
-    local tcp = vim.loop.new_tcp()
-    tcp:connect(parsed_url.host, parsed_url.port, function(err)
-        if err then
-            tcp:close()
-            return callback(nil, "Connection error: " .. err)
+    vim.loop.getaddrinfo(parsed_url.host, nil, {}, function(err, addresses)
+        if err or not addresses or #addresses == 0 then
+            return callback(nil, "DNS resolution error: " .. (err or "No addresses found"))
         end
 
-        local request = {
-            "POST /auth HTTP/1.1",
-            "Host: " .. parsed_url.host,
-            "Content-Type: application/x-www-form-urlencoded",
-            "Content-Length: " .. #body,
-            "",
-            body
-        }
-        local request_data = table.concat(request, "\r\n")
+        local ip = addresses[1].addr
+        local tcp = vim.loop.new_tcp()
 
-        tcp:write(request_data, function(write_err)
-            if write_err then
+        tcp:connect(ip, parsed_url.port, function(connect_err)
+            if connect_err then
                 tcp:close()
-                return callback(nil, "Write error: " .. write_err)
+                return callback(nil, "Connection error: " .. connect_err)
             end
+            
+            local request = {
+                "POST /auth HTTP/1.1",
+                "Host: " .. parsed_url.host,
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " .. #body,
+                "",
+                body
+            }
+            local request_data = table.concat(request, "\r\n")
 
-            tcp:read_start(function(read_err, data)
-                if read_err then
+            tcp:write(request_data, function(write_err)
+                if write_err then
                     tcp:close()
-                    return callback(nil, "Read error: " .. read_err)
+                    return callback(nil, "Write error: " .. write_err)
                 end
 
-                if not data then
+                tcp:read_start(function(read_err, data)
+                    if read_err then
+                        tcp:close()
+                        return callback(nil, "Read error: " .. read_err)
+                    end
+
+                    if not data then
+                        tcp:close()
+                        return
+                    end
+
+                    local token = data:match('"token":"(.-)"')
+                    if token then
+                        callback(token, nil)
+                    else
+                        callback(nil, "Failed to parse token from response")
+                    end
                     tcp:close()
-                    return
-                end
-
-                local token = data:match('"token":"(.-)"')
-                if token then
-                    callback(token, nil)
-                else
-                    callback(nil, "Failed to parse token from response")
-                end
-                tcp:close()
+                end)
             end)
         end)
     end)
