@@ -1,27 +1,31 @@
-print("Loading LuaTTY plugin...")
+vim.api.nvim_create_user_command('LuattySetup', function()
+    require('luatty.setup')
+end, {})
 
-vim.cmd [[packadd packer.nvim]]
-
-require('packer').startup(function(use)
-  use {
-    'mmacz/LuaTTY',
-    config = function()
-      require('luatty.setup')
-      require('luatty')
-
-      local luatty = require('luatty')
-
-      vim.api.nvim_create_user_command('LuaTTYConnect', function(opts)
-        local server_name, server_port, username = opts.args:match("^(%S+)%s+(%d+)%s+(%S+)$")  -- Extract arguments
-        server_port = tonumber(server_port)  -- Convert server port to number
-        luatty.authorize(server_name, username, server_port)
-      end, { nargs = 3 })
-
-      vim.api.nvim_create_user_command('LuaTTYSend', function(opts)
-        local message = opts.args
-        luatty.send_message(message)
-      end, { nargs = 1 })
+vim.api.nvim_create_user_command('LuattyAuthorize', function(args)
+    local input = vim.split(args.args, " ")
+    if #input < 3 then
+        vim.notify("Usage: :LuattyAuthorize <server_name> <username> <server_port>", vim.log.levels.ERROR)
+        return
     end
-  }
-end)
+    require('luatty').authorize(input[1], input[2], input[3])
+end, { nargs = '*' })
+
+vim.api.nvim_create_user_command('LuattyConnect', function()
+    local luatty = require('luatty')
+    if luatty.state.connected then
+        luatty.connect_to_websocket()
+    else
+        vim.notify("You must authorize first using :LuattyAuthorize", vim.log.levels.ERROR)
+    end
+end, {})
+
+vim.api.nvim_create_user_command('LuattySend', function(args)
+    local message = args.args
+    if message == "" then
+        vim.notify("Usage: :LuattySend <message>", vim.log.levels.ERROR)
+        return
+    end
+    require('luatty').send_message(message)
+end, { nargs = 1 })
 

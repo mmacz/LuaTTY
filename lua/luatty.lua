@@ -29,8 +29,8 @@ local function authenticate(username, server_address)
         body = request_body,
     })
     if res.status == 200 then
-        local api_response, pos, err = dkjson.decode(body, 1, nil)
-        if api_response.token then
+        local api_response, _, err = dkjson.decode(body, 1, nil)
+        if api_response and api_response.token then
             return api_response.token
         else
             return nil, "Authentication failed"
@@ -127,7 +127,7 @@ function M.connect_to_websocket()
     M.ws_client = ws
 
     ws:on("message", function(_, msg)
-        local event, pos, err = dkjson.decode(msg, 1, nil)
+        local event, _, err = dkjson.decode(msg, 1, nil)
         if event then
             if event.type == "message" then
                 handle_event("message", event)
