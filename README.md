@@ -10,6 +10,10 @@ Use [Packer](https://github.com/wbthomason/packer.nvim) to install:
 use {
   'mmacz/LuaTTY',
   config = function()
-    require('luatty')
+      require('luatty')
+  end,
+  run = function()
+      vim.fn.system('luarocks install http')
+      vim.fn.system('luarocks install dkjson')
   end
 }
