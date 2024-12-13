@@ -43,7 +43,7 @@ local function http_post(address, body, callback)
             local request = {
                 "POST /auth HTTP/1.1",
                 "Host: " .. parsed_url.host,
-                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Type: application/json",
                 "Content-Length: " .. #body,
                 "",
                 body
