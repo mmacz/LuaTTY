@@ -11,7 +11,21 @@ local M = {
     },
 }
 
-local uv = vim.loop
+local http = require("socket.http")
+
+function M.authenticate(username, endpoint)
+    if not username or not endpoint then
+        return nil, "Invalid username or endpoint"
+    end
+
+    local response, status = http.request(endpoint .. "/auth", "username=" .. username)
+    if status ~= 200 then
+        return nil, "Authentication failed with status: " .. status
+    end
+    local token = response.match('"token":"(.-)"')
+
+    return token, nil
+end
 
 function M.authorize(server_name, username, server_port)
     local token, err = M.authenticate(username, server_name .. ":" .. server_port)
