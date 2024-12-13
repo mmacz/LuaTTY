@@ -67,12 +67,12 @@ local function http_post(address, body, callback)
                         return
                     end
 
-                    local token = data:match('"token":"(.-)"')
-                    if token then
-                        callback(token, nil)
-                    else
-                        callback(nil, "Failed to parse token from response")
+                    local token = data:match('"token"%s*:%s*"(.-)"')
+                    if not token then
+                        return callback(nil, "Failed to parse token from response: " .. data)
                     end
+
+                    callback(token, nil)
                     tcp:close()
                 end)
             end)
