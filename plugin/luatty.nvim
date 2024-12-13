@@ -1,3 +1,7 @@
+local setup = require("luatty.setup")
+setup.add_packer_luarocks_paths()
+setup.install_luarocks_dependencies()
+
 vim.api.nvim_create_user_command('LuaTTYSetup', function()
     require('luatty.setup')
 end, {})
