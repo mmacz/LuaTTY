@@ -27,7 +27,3 @@ vim.api.nvim_create_user_command("LuaTTYSend", function(args)
     luatty.send_message(message)
 end, { nargs = 1 })
 
-vim.api.nvim_create_user_command("LuaTTYInstallDeps", function()
-    vim.notify("Dependencies are no longer needed as the plugin is now dependency-free!", vim.log.levels.INFO)
-end, {})
-
