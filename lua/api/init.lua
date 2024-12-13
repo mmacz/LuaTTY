@@ -20,11 +20,13 @@ local function parse_url(address)
     return { host = host, port = port }
 end
 
-local function http_post(address, body, callback)
+local function http_post(address, body_table, callback)
     local parsed_url, err = parse_url(address)
     if not parsed_url then
         return callback(nil, "Address parsing error: " .. err)
     end
+
+    local body = vim.fn.json_encode(body_table)
 
     vim.loop.getaddrinfo(parsed_url.host, nil, {}, function(err, addresses)
         if err or not addresses or #addresses == 0 then
@@ -39,7 +41,7 @@ local function http_post(address, body, callback)
                 tcp:close()
                 return callback(nil, "Connection error: " .. connect_err)
             end
-            
+
             local request = {
                 "POST /auth HTTP/1.1",
                 "Host: " .. parsed_url.host,
@@ -68,11 +70,11 @@ local function http_post(address, body, callback)
                     end
 
                     local token = data:match('"token"%s*:%s*"(.-)"')
-                    if not token then
-                        return callback(nil, "Failed to parse token from response: " .. data)
+                    if token then
+                        callback(token, nil)
+                    else
+                        callback(nil, "Failed to parse token from response: " .. data)
                     end
-
-                    callback(token, nil)
                     tcp:close()
                 end)
             end)
@@ -81,9 +83,9 @@ local function http_post(address, body, callback)
 end
 
 function M.authenticate(username, server_address, callback)
-    local body = "username=" .. username
+    local body_table = { username = username }
 
-    http_post(server_address, body, function(token, err)
+    http_post(server_address, body_table, function(token, err)
         if err then
             return callback(nil, err)
         end
