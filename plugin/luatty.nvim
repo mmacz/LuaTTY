@@ -1,3 +1,5 @@
+print("LuaTTY plugin loaded!")
+
 local luatty = require("luatty")
 
 vim.api.nvim_create_user_command("LuaTTYAuthorize", function(args)
