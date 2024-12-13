@@ -11,21 +11,31 @@ local M = {
     },
 }
 
-local function http_post(url, body, callback)
-    local parsed_url = require("socket.url").parse(url)
-    local host = parsed_url.host
-    local port = tonumber(parsed_url.port) or (parsed_url.scheme == "https" and 443 or 80)
+local function parse_url(address)
+    local host, port = address:match("^([^:]+):?(%d*)$")
+    if not host then
+        return nil, "Invalid address format"
+    end
+    port = port ~= "" and tonumber(port) or 8880
+    return { host = host, port = port }
+end
+
+local function http_post(address, body, callback)
+    local parsed_url, err = parse_url(address)
+    if not parsed_url then
+        return callback(nil, "Address parsing error: " .. err)
+    end
 
     local tcp = vim.loop.new_tcp()
-    tcp:connect(host, port, function(err)
+    tcp:connect(parsed_url.host, parsed_url.port, function(err)
         if err then
             tcp:close()
             return callback(nil, "Connection error: " .. err)
         end
 
         local request = {
-            "POST " .. (parsed_url.path or "/") .. " HTTP/1.1",
-            "Host: " .. host,
+            "POST /auth HTTP/1.1",
+            "Host: " .. parsed_url.host,
             "Content-Type: application/x-www-form-urlencoded",
             "Content-Length: " .. #body,
             "",
@@ -62,11 +72,10 @@ local function http_post(url, body, callback)
     end)
 end
 
-function M.authenticate(username, endpoint, callback)
-    local url = endpoint .. "/auth"
+function M.authenticate(username, server_address, callback)
     local body = "username=" .. username
 
-    http_post(url, body, function(token, err)
+    http_post(server_address, body, function(token, err)
         if err then
             return callback(nil, err)
         end
