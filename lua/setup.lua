@@ -1,5 +1,6 @@
 local function install_dependencies()
   local dependencies = {"lua-http", "lua-ssl", "dkjson"}
+  
   for _, dep in ipairs(dependencies) do
     local command = "luarocks install " .. dep
     local result = vim.fn.system(command)
@@ -13,4 +14,3 @@ local function install_dependencies()
 end
 
 install_dependencies()
-

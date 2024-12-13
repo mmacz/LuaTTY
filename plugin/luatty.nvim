@@ -1,13 +1,25 @@
-local luatty = require('luatty')
+vim.cmd [[packadd packer.nvim]]
 
-vim.api.nvim_create_user_command('LuaTTYConnect', function(opts)
-  local server_name, server_port, username = opts.args:match("^(%S+)%s+(%d+)%s+(%S+)$")
-  server_port = tonumber(server_port)
-  luatty.authorize(server_name, username, server_port)
-end, { nargs = 3 })
+require('packer').startup(function(use)
+  use {
+    'mmacz/LuaTTY',
+    config = function()
+      require('luatty.setup')  -- This will load `lua/setup.lua` to install dependencies
+      require('luatty')  -- This will load your `lua/luatty.lua` file
 
-vim.api.nvim_create_user_command('LuaTTYSend', function(opts)
-  local message = opts.args
-  luatty.send_message(message)
-end, { nargs = 1 })
+      local luatty = require('luatty')
+
+      vim.api.nvim_create_user_command('LuaTTYConnect', function(opts)
+        local server_name, server_port, username = opts.args:match("^(%S+)%s+(%d+)%s+(%S+)$")  -- Extract arguments
+        server_port = tonumber(server_port)  -- Convert server port to number
+        luatty.authorize(server_name, username, server_port)
+      end, { nargs = 3 })
+
+      vim.api.nvim_create_user_command('LuaTTYSend', function(opts)
+        local message = opts.args
+        luatty.send_message(message)
+      end, { nargs = 1 })
+    end
+  }
+end)
 
