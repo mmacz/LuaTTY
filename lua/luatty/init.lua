@@ -1,10 +1,3 @@
-local plugin_path = vim.fn.stdpath("data") .. "/site/pack/packer/start/luatty"
-if not string.find(vim.o.runtimepath, plugin_path, 1, true) then
-    vim.o.runtimepath = vim.o.runtimepath .. "," .. plugin_path
-end
-
-print("LuaTTY loaded & added to runtimepath")
-
 local M = {
     state = {
         server_name = nil,
