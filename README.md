@@ -18,8 +18,4 @@ use {
   config = function()
       require('luatty')
   end,
-  run = function()
-      vim.fn.system('luarocks install http')
-      vim.fn.system('luarocks install dkjson')
-  end
 }
