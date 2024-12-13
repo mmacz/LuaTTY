@@ -1,31 +1,35 @@
-vim.api.nvim_create_user_command('LuattySetup', function()
+vim.api.nvim_create_user_command('LuaTTYSetup', function()
     require('luatty.setup')
 end, {})
 
-vim.api.nvim_create_user_command('LuattyAuthorize', function(args)
+vim.api.nvim_create_user_command('LuaTTYAuthorize', function(args)
     local input = vim.split(args.args, " ")
     if #input < 3 then
-        vim.notify("Usage: :LuattyAuthorize <server_name> <username> <server_port>", vim.log.levels.ERROR)
+        vim.notify("Usage: :LuaTTYAuthorize <server_name> <username> <server_port>", vim.log.levels.ERROR)
         return
     end
     require('luatty').authorize(input[1], input[2], input[3])
 end, { nargs = '*' })
 
-vim.api.nvim_create_user_command('LuattyConnect', function()
+vim.api.nvim_create_user_command('LuaTTYConnect', function()
     local luatty = require('luatty')
     if luatty.state.connected then
         luatty.connect_to_websocket()
     else
-        vim.notify("You must authorize first using :LuattyAuthorize", vim.log.levels.ERROR)
+        vim.notify("You must authorize first using :LuaTTYAuthorize", vim.log.levels.ERROR)
     end
 end, {})
 
-vim.api.nvim_create_user_command('LuattySend', function(args)
+vim.api.nvim_create_user_command('LuaTTYSend', function(args)
     local message = args.args
     if message == "" then
-        vim.notify("Usage: :LuattySend <message>", vim.log.levels.ERROR)
+        vim.notify("Usage: :LuaTTYSend <message>", vim.log.levels.ERROR)
         return
     end
     require('luatty').send_message(message)
 end, { nargs = 1 })
+
+vim.api.nvim_create_user_command('LuaTTYInstallDeps', function()
+    require('luatty.setup').install_dependencies()
+end, {})
 
