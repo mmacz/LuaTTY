@@ -1,7 +1,7 @@
 print("Running setup.lua to install dependencies...")
 
 local function install_dependencies()
-  local dependencies = {"http", "lua-ssl", "dkjson"}
+  local dependencies = {"http", "dkjson"}
   
   for _, dep in ipairs(dependencies) do
     local command = "luarocks install " .. dep
