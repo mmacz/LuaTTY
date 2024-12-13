@@ -2,40 +2,41 @@ local setup = require("luatty.setup")
 setup.add_packer_luarocks_paths()
 setup.install_luarocks_dependencies()
 
-local luatty = require('luatty')
+local luatty = require("luatty")
 
-vim.api.nvim_create_user_command('LuaTTYSetup', function()
-    require('luatty.setup')
-end, {})
-
-vim.api.nvim_create_user_command('LuaTTYAuthorize', function(args)
+vim.api.nvim_create_user_command("LuaTTYAuthorize", function(args)
     local input = vim.split(args.args, " ")
     if #input < 3 then
         vim.notify("Usage: :LuaTTYAuthorize <server_name> <username> <server_port>", vim.log.levels.ERROR)
         return
     end
-    require('luatty').authorize(input[1], input[2], input[3])
-end, { nargs = '*' })
+    pcall(function()
+        luatty.authorize(input[1], input[2], input[3])
+    end)
+end, { nargs = "*" })
 
-vim.api.nvim_create_user_command('LuaTTYConnect', function()
-    local luatty = require('luatty')
-    if luatty.state.connected then
-        luatty.connect_to_websocket()
+vim.api.nvim_create_user_command("LuaTTYConnect", function()
+    if luatty.state and luatty.state.connected then
+        pcall(function()
+            luatty.connect_to_websocket()
+        end)
     else
         vim.notify("You must authorize first using :LuaTTYAuthorize", vim.log.levels.ERROR)
     end
 end, {})
 
-vim.api.nvim_create_user_command('LuaTTYSend', function(args)
+vim.api.nvim_create_user_command("LuaTTYSend", function(args)
     local message = args.args
     if message == "" then
         vim.notify("Usage: :LuaTTYSend <message>", vim.log.levels.ERROR)
         return
     end
-    require('luatty').send_message(message)
+    pcall(function()
+        luatty.send_message(message)
+    end)
 end, { nargs = 1 })
 
-vim.api.nvim_create_user_command('LuaTTYInstallDeps', function()
-    require('luatty.setup').install_dependencies()
+vim.api.nvim_create_user_command("LuaTTYInstallDeps", function()
+    setup.install_luarocks_dependencies()
 end, {})
 
