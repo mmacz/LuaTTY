@@ -1,11 +1,13 @@
+print("Loading LuaTTY plugin...")
+
 vim.cmd [[packadd packer.nvim]]
 
 require('packer').startup(function(use)
   use {
     'mmacz/LuaTTY',
     config = function()
-      require('luatty.setup')  -- This will load `lua/setup.lua` to install dependencies
-      require('luatty')  -- This will load your `lua/luatty.lua` file
+      require('luatty.setup')
+      require('luatty')
 
       local luatty = require('luatty')
 

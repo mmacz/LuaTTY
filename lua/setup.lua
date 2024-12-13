@@ -1,3 +1,5 @@
+print("Running setup.lua to install dependencies...")
+
 local function install_dependencies()
   local dependencies = {"lua-http", "lua-ssl", "dkjson"}
   
