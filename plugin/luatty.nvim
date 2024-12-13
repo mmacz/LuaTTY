@@ -1,3 +1,5 @@
+print("Loading LuaTTY plugin...")
+
 local setup = require("luatty.setup")
 setup.add_packer_luarocks_paths()
 setup.install_luarocks_dependencies()
