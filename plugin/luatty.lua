@@ -1,4 +1,4 @@
-local luatty = require("api")
+local luatty = require("luatty")
 
 local function open_chat_buffer()
     local buf = vim.api.nvim_create_buf(false, true) -- No file, no swap
