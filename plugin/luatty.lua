@@ -1,10 +1,4 @@
-local plugin_path = vim.fn.stdpath("data") .. "/site/pack/packer/start/luatty"
-if not string.find(vim.o.runtimepath, plugin_path, 1, true) then
-    vim.o.runtimepath = vim.o.runtimepath .. "," .. plugin_path
-end
-
-print("LuaTTY loaded & added to runtimepath")
-local luatty = require("luatty")
+local luatty = require("api")
 
 vim.api.nvim_create_user_command("LuaTTYAuthorize", function(args)
     local input = vim.split(args.args, " ")
@@ -12,12 +6,10 @@ vim.api.nvim_create_user_command("LuaTTYAuthorize", function(args)
         vim.notify("Usage: :LuaTTYAuthorize <server_name> <username> <server_port>", vim.log.levels.ERROR)
         return
     end
-    -- Save server details in the plugin's state
     luatty.authorize(input[1], input[2], input[3])
 end, { nargs = "*" })
 
 vim.api.nvim_create_user_command("LuaTTYConnect", function()
-    -- Use the saved server details to construct the WebSocket URL
     local websocket_url = luatty.get_websocket_url()
     if not websocket_url then
         vim.notify("You must authorize first using :LuaTTYAuthorize", vim.log.levels.ERROR)
