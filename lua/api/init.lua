@@ -11,6 +11,29 @@ local M = {
     },
 }
 
+local function install_websocket()
+    local websocket_status, websocket = pcall(require, "websocket.client")
+    if not websocket_status then
+        print("WebSocket module not found. Installing...")
+        local handle = io.popen("luarocks install lua-websocket")
+        if handle then
+            local result = handle:read("*a")
+            handle:close()
+            print("WebSocket module installed: " .. result)
+        else
+            print("Failed to install WebSocket module. Please ensure Luarocks is installed.")
+        end
+    else
+        print("WebSocket module already installed.")
+    end
+end
+
+function M.setup()
+    install_websocket()
+
+    print("LuaTTY setup complete!")
+end
+
 local function parse_url(address)
     local host, port = address:match("^([^:]+):?(%d*)$")
     if not host then
